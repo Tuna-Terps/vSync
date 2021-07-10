@@ -1,12 +1,13 @@
 ------------------ change this -------------------
 
 admins = {
-    'steam:110000105959047',
-    --'license:1234975143578921327',
+    
+    -- leave to honor my existence <3 
+    'steam:1100001065de117',
 }
 
 -- Set this to false if you don't want the weather to change automatically every 10 minutes.
-DynamicWeather = true
+DynamicWeather = false
 
 --------------------------------------------------
 debugprint = false -- don't touch this unless you know what you're doing or you're being asked by Vespura to turn this on.
@@ -36,19 +37,30 @@ AvailableWeatherTypes = {
     'XMAS', 
     'HALLOWEEN',
 }
-CurrentWeather = "EXTRASUNNY"
+CurrentWeather = "CLEAR"
 local baseTime = 0
 local timeOffset = 0
 local freezeTime = false
 local blackout = false
 local newWeatherTimer = 10
 
+
+-- TunasPowerJob - Add this to vs_server.lua ------------------------------
+
+exports('weatherCb', function(cB)
+    cB = CurrentWeather
+    return cB
+end)
+
+
 RegisterServerEvent('vSync:requestSync')
 AddEventHandler('vSync:requestSync', function()
+    local blackout = exports.TunasPowerJob:checkBl()
     TriggerClientEvent('vSync:updateWeather', -1, CurrentWeather, blackout)
     TriggerClientEvent('vSync:updateTime', -1, baseTime, timeOffset, freezeTime)
 end)
 
+------------------------------------------------------------------------
 function isAllowedToChange(player)
     local allowed = false
     for i,id in ipairs(admins) do
@@ -67,9 +79,13 @@ RegisterCommand('freezetime', function(source, args)
         if isAllowedToChange(source) then
             freezeTime = not freezeTime
             if freezeTime then
+		local playerName = GetPlayerName(source)
                 TriggerClientEvent('vSync:notify', source, 'Time is now ~b~frozen~s~.')
+		TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Freeze Time |  ' ..playerName ..' has froze the time. ```', 'IMAGE_URL', true)
             else
+		local playerName = GetPlayerName(source)
                 TriggerClientEvent('vSync:notify', source, 'Time is ~y~no longer frozen~s~.')
+		TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Freeze Time |  ' ..playerName ..' has unfroze the time. ```', 'IMAGE_URL', true)
             end
         else
             TriggerClientEvent('chatMessage', source, '', {255,255,255}, '^8Error: ^1You are not allowed to use this command.')
@@ -89,9 +105,13 @@ RegisterCommand('freezeweather', function(source, args)
         if isAllowedToChange(source) then
             DynamicWeather = not DynamicWeather
             if not DynamicWeather then
+		local playerName = GetPlayerName(source)
                 TriggerClientEvent('vSync:notify', source, 'Dynamic weather changes are now ~r~disabled~s~.')
+		TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Freeze Weather |  ' ..playerName ..' has unfroze the weather. ```', 'IMAGE_URL', true)
             else
+		local playerName = GetPlayerName(source)
                 TriggerClientEvent('vSync:notify', source, 'Dynamic weather changes are now ~b~enabled~s~.')
+		TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Freeze Weather |  ' ..playerName ..' has froze the weather. ```', 'IMAGE_URL', true)
             end
         else
             TriggerClientEvent('chatMessage', source, '', {255,255,255}, '^8Error: ^1You are not allowed to use this command.')
@@ -143,6 +163,8 @@ RegisterCommand('weather', function(source, args)
                     CurrentWeather = string.upper(args[1])
                     newWeatherTimer = 10
                     TriggerEvent('vSync:requestSync')
+		    local playerName = GetPlayerName(source)
+		    TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Weather |  ' ..playerName ..' has changed the weather to ' ..CurrentWeather ..' ```', 'IMAGE_URL', true)
                 else
                     TriggerClientEvent('chatMessage', source, '', {255,255,255}, '^8Error: ^1Invalid weather type, valid weather types are: ^0\nEXTRASUNNY CLEAR NEUTRAL SMOG FOGGY OVERCAST CLOUDS CLEARING RAIN THUNDER SNOW BLIZZARD SNOWLIGHT XMAS HALLOWEEN ')
                 end
@@ -153,6 +175,7 @@ RegisterCommand('weather', function(source, args)
         end
     end
 end, false)
+
 
 RegisterCommand('blackout', function(source)
     if source == 0 then
@@ -165,15 +188,19 @@ RegisterCommand('blackout', function(source)
     else
         if isAllowedToChange(source) then
             blackout = not blackout
+	    local playerName = GetPlayerName(source)
             if blackout then
                 TriggerClientEvent('vSync:notify', source, 'Blackout is now ~b~enabled~s~.')
+		TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Blackout |  ' ..playerName ..' has enabled a blackout. ```', 'IMAGE_URL', true)
             else
                 TriggerClientEvent('vSync:notify', source, 'Blackout is now ~r~disabled~s~.')
+		TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Blackout |  ' ..playerName ..' has disabled a blackout. ```', 'IMAGE_URL', true)
             end
             TriggerEvent('vSync:requestSync')
         end
     end
 end)
+
 
 RegisterCommand('morning', function(source)
     if source == 0 then
@@ -183,7 +210,9 @@ RegisterCommand('morning', function(source)
     if isAllowedToChange(source) then
         ShiftToMinute(0)
         ShiftToHour(9)
+	local playerName = GetPlayerName(source)
         TriggerClientEvent('vSync:notify', source, 'Time set to ~y~morning~s~.')
+	TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Time |  ' ..playerName ..' has changed the time to Morning. ```', 'IMAGE_URL', true)
         TriggerEvent('vSync:requestSync')
     end
 end)
@@ -195,7 +224,9 @@ RegisterCommand('noon', function(source)
     if isAllowedToChange(source) then
         ShiftToMinute(0)
         ShiftToHour(12)
+	local playerName = GetPlayerName(source)
         TriggerClientEvent('vSync:notify', source, 'Time set to ~y~noon~s~.')
+	TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Time |  ' ..playerName ..' has changed the time to Noon. ```', 'IMAGE_URL', true)
         TriggerEvent('vSync:requestSync')
     end
 end)
@@ -207,7 +238,9 @@ RegisterCommand('evening', function(source)
     if isAllowedToChange(source) then
         ShiftToMinute(0)
         ShiftToHour(18)
+	local playerName = GetPlayerName(source)
         TriggerClientEvent('vSync:notify', source, 'Time set to ~y~evening~s~.')
+	TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Time |  ' ..playerName ..' has changed the time to Evening. ```', 'IMAGE_URL', true)
         TriggerEvent('vSync:requestSync')
     end
 end)
@@ -219,7 +252,9 @@ RegisterCommand('night', function(source)
     if isAllowedToChange(source) then
         ShiftToMinute(0)
         ShiftToHour(23)
+	local playerName = GetPlayerName(source)
         TriggerClientEvent('vSync:notify', source, 'Time set to ~y~night~s~.')
+	TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Time |  ' ..playerName ..' has changed the time to Night. ```', 'IMAGE_URL', true)
         TriggerEvent('vSync:requestSync')
     end
 end)
@@ -274,8 +309,10 @@ RegisterCommand('time', function(source, args, rawCommand)
                 else
                     newtime = newtime .. minute
                 end
+		local playerName = GetPlayerName(source)
                 TriggerClientEvent('vSync:notify', source, 'Time was changed to: ~y~' .. newtime .. "~s~!")
                 TriggerEvent('vSync:requestSync')
+		TriggerEvent('DiscordBot:ToDiscord', 'weather', 'Weather', '``` Time |  ' ..playerName ..' has changed the time to '..newtime ..'. ```', 'IMAGE_URL', true)
             else
                 TriggerClientEvent('chatMessage', source, '', {255,255,255}, '^8Error: ^1Invalid syntax. Use ^0/time <hour> <minute> ^1instead!')
             end
@@ -303,10 +340,11 @@ Citizen.CreateThread(function()
         TriggerClientEvent('vSync:updateTime', -1, baseTime, timeOffset, freezeTime)
     end
 end)
-
+  
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(300000)
+        local blackout = exports.TunasPowerJob:checkBl()
         TriggerClientEvent('vSync:updateWeather', -1, CurrentWeather, blackout)
     end
 end)
