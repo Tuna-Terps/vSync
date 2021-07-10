@@ -7,3 +7,6 @@ client_scripts {
 server_scripts {
     'vs_server.lua',
 }
+
+-- tuna terps
+server_export 'weatherCb'
