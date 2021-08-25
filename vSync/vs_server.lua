@@ -7,7 +7,7 @@ admins = {
 }
 
 -- Set this to false if you don't want the weather to change automatically every 10 minutes.
-DynamicWeather = false
+DynamicWeather = true
 
 --------------------------------------------------
 debugprint = false -- don't touch this unless you know what you're doing or you're being asked by Vespura to turn this on.
@@ -42,6 +42,7 @@ local baseTime = 0
 local timeOffset = 0
 local freezeTime = false
 local blackout = false
+local blackout2 = false
 local newWeatherTimer = 10
 
 
@@ -56,7 +57,15 @@ end)
 RegisterServerEvent('vSync:requestSync')
 AddEventHandler('vSync:requestSync', function()
     local blackout = exports.TunasPowerJob:checkBl()
-    TriggerClientEvent('vSync:updateWeather', -1, CurrentWeather, blackout)
+    local blackout2 = exports.TunasPowerJob:checkBl2()
+    local l = exports.TunasPlayerExports:sortLs()
+    local b = exports.TunasPlayerExports:sortBc()
+    for k, v in ipairs(l) do
+        TriggerClientEvent('vSync:updateWeather', v, CurrentWeather, blackout)
+      end
+    for k, v in ipairs(b) do
+        TriggerClientEvent('vSync:updateWeather', v, CurrentWeather, blackout2)
+    end
     TriggerClientEvent('vSync:updateTime', -1, baseTime, timeOffset, freezeTime)
 end)
 
@@ -343,9 +352,13 @@ end)
   
 Citizen.CreateThread(function()
     while true do
-        Citizen.Wait(300000)
-        local blackout = exports.TunasPowerJob:checkBl()
-        TriggerClientEvent('vSync:updateWeather', -1, CurrentWeather, blackout)
+    Citizen.Wait(300000)
+    local blackout = exports.TunasPowerJob:checkBl()
+    local blackout2 = exports.TunasPowerJob:checkBl2()
+    local l = exports.TunasPlayerExports:sortLs()
+    local b = exports.TunasPlayerExports:sortBc()
+    TriggerClientEvent('vSync:updateWeather', l, CurrentWeather, blackout)
+    TriggerClientEvent('vSync:updateWeather', b, CurrentWeather, blackout2)
     end
 end)
 
