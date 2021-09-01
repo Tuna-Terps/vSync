@@ -57,15 +57,7 @@ end)
 RegisterServerEvent('vSync:requestSync')
 AddEventHandler('vSync:requestSync', function()
     local blackout = exports.TunasPowerJob:checkBl()
-    local blackout2 = exports.TunasPowerJob:checkBl2()
-    local l = exports.TunasPlayerExports:sortLs()
-    local b = exports.TunasPlayerExports:sortBc()
-    for k, v in ipairs(l) do
-        TriggerClientEvent('vSync:updateWeather', v, CurrentWeather, blackout)
-      end
-    for k, v in ipairs(b) do
-        TriggerClientEvent('vSync:updateWeather', v, CurrentWeather, blackout2)
-    end
+    TriggerClientEvent('vSync:updateWeather', v, CurrentWeather, blackout)
     TriggerClientEvent('vSync:updateTime', -1, baseTime, timeOffset, freezeTime)
 end)
 
